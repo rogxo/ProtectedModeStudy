@@ -1,0 +1,100 @@
+环境Win7 x32
+
+gdtr = 80b93800
+gdtl = 3ff
+
+80b93800  00000000`00000000 00cf9b00`0000ffff
+80b93810  00cf9300`0000ffff 00cffb00`0000ffff
+80b93820  00cff300`0000ffff 80008bb9`3c0020ab
+80b93830  804093b9`60004fff 0040f300`00000fff
+80b93840  0000f200`0400ffff 00000000`00000000
+80b93850  800089b9`5d200067 800089b9`5cb00067
+80b93860  00000000`00000000 00000000`00000000
+80b93870  800092b9`380003ff 00000000`00000000
+80b93880  00000000`00000000 00000000`00000000
+80b93890  00000000`00000000 00000000`00000000
+80b938a0  800089b9`5d900067 00000000`00000000
+80b938b0  00000000`00000000 00000000`00000000
+........  00000000`00000000 00000000`00000000
+80b93bf0  00000000`00000000 00000000`00000000
+
+
+G — Granularity
+LIMIT — Segment Limit
+P — Segment present
+S — Descriptor type (0 = system; 1 = code or data)
+TYPE — Segment type
+DPL — Descriptor privilege level
+AVL — Available for use by system software
+BASE — Segment base address
+D/B — Default operation size (0 = 16-bit segment; 1 = 32-bit segment)
+L — 64-bit code segment (IA-32e mode onl
+
+
+P  DPL  S
+1  0/3  1 = 9/f
+当段描述符长这样：
+    xxxx9xxx`xxxxxxxx 
+或  xxxxfxxx`xxxxxxxx 
+的时候为代码段/数据段描述符
+故：
+gdt[1]  = 00cf9b00`0000ffff		//Code Execute/Read, accessed
+gdt[2]  = 00cf9300`0000ffff		//Data Read/Write, accessed
+gdt[3]  = 00cffb00`0000ffff		//Code Execute/Read, accessed
+gdt[4]  = 00cff300`0000ffff		//Data Read/Write, accessed
+gdt[6]  = 804093b9`60004fff		//Data Read/Write, accessed
+gdt[7]  = 0040f300`00000fff		//Data Read/Write, accessed
+gdt[8]  = 0000f200`0400ffff		//Data Read/Write
+gdt[14] = 800092b9`380003ff		//Data Read/Write
+共8个其中TYPE<8时为Data段，TYPE>=8时为Code段
+Type Field Description
+Decimal  11 10  9  8
+             E  W  A
+0         0  0  0  0 Data Read-Only
+1         0  0  0  1 Data Read-Only, accessed
+2         0  0  1  0 Data Read/Write
+3         0  0  1  1 Data Read/Write, accessed
+4         0  1  0  0 Data Read-Only, expand-down
+5         0  1  0  1 Data Read-Only, expand-down, accessed
+6         0  1  1  0 Data Read/Write, expand-down
+7         0  1  1  1 Data Read/Write, expand-down, accessed
+		     C  R  A
+8         1  0  0  0 Code Execute-Only
+9         1  0  0  1 Code Execute-Only, accessed
+10        1  0  1  0 Code Execute/Read
+11        1  0  1  1 Code Execute/Read, accessed
+12        1  1  0  0 Code Execute-Only, conforming
+13        1  1  0  1 Code Execute-Only, conforming, accessed
+14        1  1  1  0 Code Execute/Read, conforming
+15        1  1  1  1 Code Execute/Read, conforming, accessed
+
+
+P  DPL  S
+1  0/3  0 = 8/e
+当段描述符长这样：
+    xxxx8xxx`xxxxxxxx 
+或  xxxxexxx`xxxxxxxx 
+的时候为系统段描述符
+gdt[5]  = 80008bb9`3c0020ab		//32-bit TSS (Busy)
+gdt[10] = 800089b9`5d200067		//32-bit TSS (Available)
+gdt[11] = 800089b9`5cb00067		//32-bit TSS (Available)
+gdt[20] = 800089b9`5d900067		//32-bit TSS (Available)
+共4个其中：
+Type Field Description
+Decimal  11 10  9  8		 32-Bit Mode 					IA-32e Mode
+0         0  0  0  0		 Reserved						Reserved
+1         0  0  0  1		 16-bit TSS (Available) 		Reserved
+2         0  0  1  0		 LDT 							LDT
+3         0  0  1  1		 16-bit TSS (Busy) 				Reserved
+4         0  1  0  0		 16-bit Call Gate 				Reserved
+5         0  1  0  1		 Task Gate 						Reserved
+6         0  1  1  0		 16-bit Interrupt Gate 			Reserved
+7         0  1  1  1		 16-bit Trap Gate 				Reserved
+8         1  0  0  0		 Reserved 						Reserved
+9         1  0  0  1		 32-bit TSS (Available) 		64-bit TSS (Available)
+10        1  0  1  0		 Reserved 						Reserve
+11        1  0  1  1		 32-bit TSS (Busy) 				64-bit TSS (Busy
+12        1  1  0  0		 32-bit Call Gate 				64-bit Call Gat
+13        1  1  0  1		 Reserved 						Reserve
+14        1  1  1  0		 32-bit Interrupt 				Gate 64-bit Interrupt Gate
+15        1  1  1  1		 32-bit Trap Gate 				64-bit Trap Gate
